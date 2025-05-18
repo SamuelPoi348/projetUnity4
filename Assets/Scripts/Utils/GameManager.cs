@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject chestPrefab; 
+    public static GameManager Instance;
+    public GameObject chestPrefab;
     public GameObject teleporterPrefab;
 
-  public Camera CameraJoueur;     // Player's normal view
-public Camera topDownCamera;    // Overhead view
+    public Camera CameraJoueur;     // Player's normal view
+    public Camera topDownCamera;    // Overhead view
 
+    public GameObject player; // Assign this in the Inspector
 
     public int penaltyRate = 10;
 
@@ -22,10 +24,11 @@ public Camera topDownCamera;    // Overhead view
         SetTopDown(false); // Start in normal view
     }
 
+    private bool gameEnded = false;
     void Update()
     {
         // Camera switch
-        if (Input.GetKeyDown(KeyCode.Alpha1) &&  VariablesGlobales.score>=10)
+        if (Input.GetKeyDown(KeyCode.Alpha1) && VariablesGlobales.score >= 10)
         {
             SetTopDown(true);
         }
@@ -52,20 +55,38 @@ public Camera topDownCamera;    // Overhead view
             }
         }
 
+        if (VariablesGlobales.time <= 0 && !gameEnded)
+        {
+            gameEnded = true;
+            PlayerLoses();
+        }
+
         // Optional: display for debugging
-       // Debug.Log("Current Points: " + VariablesGlobales.score);
+        // Debug.Log("Current Points: " + VariablesGlobales.score);
     }
 
- void SetTopDown(bool topDown)
-{
-    VariablesGlobales.isTopDown = topDown;
-    topDownCamera.gameObject.SetActive(topDown);  // Enable top-down camera
-    CameraJoueur.gameObject.SetActive(!topDown);  // Disable normal camera
+    void SetTopDown(bool topDown)
+    {
+        VariablesGlobales.isTopDown = topDown;
+        topDownCamera.gameObject.SetActive(topDown);  // Enable top-down camera
+        CameraJoueur.gameObject.SetActive(!topDown);  // Disable normal camera
 
-    // Ensure player movement script is still active
-   // Mouvement.enabled = !topDown;  // Enable/disable movement if needed
-}
-
+        if (player != null)
+        {
+            // Hide all MeshRenderers on CorpsJoueur only, always show the triangle
+            foreach (var renderer in player.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (renderer.gameObject.name == "Triangle")
+                {
+                    renderer.enabled = true; // Always show the triangle
+                }
+                else if (renderer.gameObject.name == "CorpsJoueur")
+                {
+                    renderer.enabled = !topDown; // Hide CorpsJoueur in top-down view
+                }
+            }
+        }
+    }
 
 
     void SpawnChestsAtRandomPositions()
@@ -131,4 +152,25 @@ public Camera topDownCamera;    // Overhead view
             availablePositions.RemoveAt(randomIndex);
         }
     }
+
+
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
+    public void PlayerWins()
+    {
+        Debug.Log("You win!");
+        // Show win UI, stop player movement, etc.
+    }
+
+    public void PlayerLoses()
+    {
+        Debug.Log("You lose!");
+        // Show lose UI, stop player movement, etc.
+    }
+
+
 }

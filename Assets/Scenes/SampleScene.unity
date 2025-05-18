@@ -24785,7 +24785,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.43957815, g: 0.19215688, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -35106,6 +35106,7 @@ MonoBehaviour:
   teleporterPrefab: {fileID: 4752457369876416285, guid: 5ad33d58a66ab154a89c9e88255601e5, type: 3}
   CameraJoueur: {fileID: 963194227}
   topDownCamera: {fileID: 1999941076}
+  player: {fileID: 2135278712}
   penaltyRate: 10
 --- !u!1 &1366554734
 GameObject:
@@ -43201,7 +43202,7 @@ GameObject:
   - component: {fileID: 1671724374}
   m_Layer: 0
   m_Name: CorpsJoueur
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -54518,7 +54519,7 @@ GameObject:
   - component: {fileID: 2135278715}
   m_Layer: 0
   m_Name: player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

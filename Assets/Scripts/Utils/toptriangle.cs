@@ -29,7 +29,7 @@ public class TriangleOnCapsule : MonoBehaviour
         triangle.transform.localEulerAngles = new Vector3(-90f, 180f, 0f);
 
         // Scale it down to 0.5
-        triangle.transform.localScale = new Vector3(0.75f, 0.75f, 0.9f);
+        triangle.transform.localScale = new Vector3(0.3f, 0.9f, 0.3f);
     }
 
     Mesh CreateTriangleMesh()
