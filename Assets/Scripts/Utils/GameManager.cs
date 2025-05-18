@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
     public GameObject chestPrefab;
     public GameObject teleporterPrefab;
 
+     public GameObject deathScreen; // Drag this from the Inspector
+
     public GameObject teleReceiverPrefab;
 
     public Camera CameraJoueur;     // Player's normal view
@@ -200,6 +202,9 @@ public class GameManager : MonoBehaviour
     public void PlayerWins()
     {
         Debug.Log("You win!");
+         VariablesGlobales.level += 1;
+      VariablesGlobales.score += (int)(10 * VariablesGlobales.time);
+        VariablesGlobales.time = 60; // Reset time
         VariablesGlobales.niveau += 1; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
 
     }
@@ -207,10 +212,27 @@ public class GameManager : MonoBehaviour
     public void PlayerLoses()
     {
         Debug.Log("You lose!");
-        // Do NOT reset VariablesGlobales.niveau here
+        if (VariablesGlobales.score <200)
+        {
+              // Show death screen UI
+        if (deathScreen != null)
+        {
+            deathScreen.SetActive(true);
+            Time.timeScale = 0f; // Optional: pause game
+        }
+        else
+        {
+            Debug.LogWarning("Death screen not assigned in the inspector.");
+        }
+        }
+        else
+        {
+            // Do NOT reset VariablesGlobales.niveau here
         VariablesGlobales.time = 60; // Reset time
         VariablesGlobales.wallOpeners = VariablesGlobales.ouvreurMur[VariablesGlobales.niveau - 1]; // Reset wall openers
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reload the current scene
+        }
+       
     }
 
 }
