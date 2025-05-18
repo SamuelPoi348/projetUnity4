@@ -1,16 +1,72 @@
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject chestPrefab; // Assign your chest prefab in the Inspector
-    public GameObject teleporterPrefab; // Assign your teleporter prefab in the Inspector
+    public GameObject chestPrefab; 
+    public GameObject teleporterPrefab;
+
+  public Camera CameraJoueur;     // Player's normal view
+public Camera topDownCamera;    // Overhead view
+
+
+    public int penaltyRate = 10;
+
+    private float topDownTimeCounter = 0f;
 
     void Start()
     {
         SpawnChestsAtRandomPositions();
         SpawnTeleportersAtRandomPositions();
+
+        SetTopDown(false); // Start in normal view
     }
+
+    void Update()
+    {
+        // Camera switch
+        if (Input.GetKeyDown(KeyCode.Alpha1) &&  VariablesGlobales.score>=10)
+        {
+            SetTopDown(true);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            SetTopDown(false);
+        }
+
+        // Point penalty while in top-down view
+        if (VariablesGlobales.isTopDown)
+        {
+            topDownTimeCounter += Time.deltaTime;
+
+            if (topDownTimeCounter >= 1f)
+            {
+                int pointsToSubtract = Mathf.FloorToInt(topDownTimeCounter) * penaltyRate;
+                VariablesGlobales.score -= pointsToSubtract;
+                VariablesGlobales.score = Mathf.Max(VariablesGlobales.score, 0);
+                topDownTimeCounter -= Mathf.Floor(topDownTimeCounter); // keep leftover time
+                if (VariablesGlobales.score <= 0)
+                {
+                    SetTopDown(false); // Switch back to normal view if score is zero
+                }
+            }
+        }
+
+        // Optional: display for debugging
+       // Debug.Log("Current Points: " + VariablesGlobales.score);
+    }
+
+ void SetTopDown(bool topDown)
+{
+    VariablesGlobales.isTopDown = topDown;
+    topDownCamera.gameObject.SetActive(topDown);  // Enable top-down camera
+    CameraJoueur.gameObject.SetActive(!topDown);  // Disable normal camera
+
+    // Ensure player movement script is still active
+   // Mouvement.enabled = !topDown;  // Enable/disable movement if needed
+}
+
+
 
     void SpawnChestsAtRandomPositions()
     {
