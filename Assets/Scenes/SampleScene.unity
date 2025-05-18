@@ -35103,7 +35103,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chestPrefab: {fileID: 3519022631504989597, guid: fc740d3d9f59541cd9a4adbea33c40bd, type: 3}
-  teleporterPrefab: {fileID: 4752457369876416285, guid: 5ad33d58a66ab154a89c9e88255601e5, type: 3}
+  teleporterPrefab: {fileID: 3744133877081091469, guid: a2a060732547fe64581bb0cb3c2bdf1d, type: 3}
+  teleReceiverPrefab: {fileID: 3377181292992421420, guid: 48c5715f9603c3842a353516a8baefbb, type: 3}
   CameraJoueur: {fileID: 963194227}
   topDownCamera: {fileID: 1999941076}
   player: {fileID: 2135278712}
