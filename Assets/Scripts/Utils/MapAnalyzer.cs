@@ -7,8 +7,8 @@ public class MapAnalyzer : MonoBehaviour
     public int gridSize = 31;
     public float tileSize = 1f;
     public LayerMask wallLayer;
+    public LayerMask indestructibleWallLayer;
 
-   
 
     void Start()
     {
@@ -26,17 +26,19 @@ public class MapAnalyzer : MonoBehaviour
             for (int z = 0; z < gridSize; z++)
             {
                 Vector3 tileCenter = bottomLeft + new Vector3(x + 0.5f, 0f, z + 0.5f);
-                bool hasWall = Physics.CheckSphere(tileCenter + Vector3.up * 0.5f, 0.4f, wallLayer);
 
-                if (!hasWall)
+                // Check for both wall and indestructible wall
+                bool hasWall = Physics.CheckSphere(tileCenter + Vector3.up * 0.5f, 0.4f, wallLayer);
+                bool hasIndestructibleWall = Physics.CheckSphere(tileCenter + Vector3.up * 0.5f, 0.4f, indestructibleWallLayer);
+
+                if (!hasWall && !hasIndestructibleWall)
                 {
                     VariablesGlobales.walkablePositions.Add(tileCenter);
-
-                    //Debug.Log($"✅ Walkable: Tile ({x}, {z}) is free at {tileCenter}");
+                    // Debug.Log($"✅ Walkable: Tile ({x}, {z}) is free at {tileCenter}");
                 }
                 else
                 {
-                   // Debug.Log($"❌ Blocked: Tile ({x}, {z}) has a wall at {tileCenter}");
+                    // Debug.Log($"❌ Blocked: Tile ({x}, {z}) has a wall at {tileCenter}");
                 }
             }
         }
