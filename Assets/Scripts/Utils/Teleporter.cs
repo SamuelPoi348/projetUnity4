@@ -20,18 +20,26 @@ public class Teleporter : MonoBehaviour
             }
 
             // Temporarily disable Rigidbody to avoid physics glitches
-            Rigidbody rb = other.GetComponent<Rigidbody>();
+            Rigidbody rb = other.GetComponentInParent<Rigidbody>();
             if (rb != null)
             {
                 rb.isKinematic = true;
             }
 
-            other.transform.position = randomReceiver.transform.position + Vector3.up * yOffset;
+            // If using CharacterController, disable before teleporting
+            CharacterController cc = other.GetComponentInParent<CharacterController>();
+            if (cc != null) cc.enabled = false;
+
+            // Move the root player object
+            Transform playerRoot = other.transform.root;
+            playerRoot.position = randomReceiver.transform.position + Vector3.up * yOffset;
+
+            if (cc != null) cc.enabled = true;
 
             if (rb != null)
             {
                 rb.isKinematic = false;
-                rb.linearVelocity = Vector3.zero; // Reset velocity after teleport
+                rb.linearVelocity = Vector3.zero;
             }
 
             Debug.Log("Player teleported to: " + randomReceiver.transform.position);
