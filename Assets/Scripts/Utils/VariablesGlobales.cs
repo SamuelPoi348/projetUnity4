@@ -5,7 +5,7 @@ public static class VariablesGlobales
 {
 
     // niveau courant
-    public static int niveau = 4;
+    public static int niveau = 1;
 
     // Arrays for items
     public static int[] Tresor = new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };

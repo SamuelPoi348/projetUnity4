@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement; // Add this line at the top
 
 public class GameManager : MonoBehaviour
 {
@@ -163,14 +164,17 @@ public class GameManager : MonoBehaviour
     public void PlayerWins()
     {
         Debug.Log("You win!");
-        // Show win UI, stop player movement, etc.
+        VariablesGlobales.niveau += 1; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
+
     }
 
     public void PlayerLoses()
-    {
-        Debug.Log("You lose!");
-        // Show lose UI, stop player movement, etc.
-    }
-
+{
+    Debug.Log("You lose!");
+    // Do NOT reset VariablesGlobales.niveau here
+    VariablesGlobales.time = 60; // Reset time
+    VariablesGlobales.wallOpeners = VariablesGlobales.ouvreurMur[VariablesGlobales.niveau - 1]; // Reset wall openers
+    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reload the current scene
+}
 
 }
