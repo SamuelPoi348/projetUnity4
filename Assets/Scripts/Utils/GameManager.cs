@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public GameObject teleporterPrefab;
 
      public GameObject deathScreen; // Drag this from the Inspector
+       public GameObject winScreen; // Drag this from the Inspector
 
     public GameObject teleReceiverPrefab;
 
@@ -202,11 +203,19 @@ public class GameManager : MonoBehaviour
     public void PlayerWins()
     {
         Debug.Log("You win!");
-         VariablesGlobales.level += 1;
+        if(VariablesGlobales.level==10) {
+             if (winScreen != null) {
+            winScreen.SetActive(true);
+            Time.timeScale = 0f; // Optional: pause game
+             }
+        } else {
+ VariablesGlobales.level += 1;
       VariablesGlobales.score += (int)(10 * VariablesGlobales.time);
         VariablesGlobales.time = 60; // Reset time
         VariablesGlobales.niveau += 1; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
 
+        }
+        
     }
 
     public void PlayerLoses()
