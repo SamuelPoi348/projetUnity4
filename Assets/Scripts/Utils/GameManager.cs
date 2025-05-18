@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
     public GameObject chestPrefab;
     public GameObject teleporterPrefab;
 
+    public GameObject teleReceiverPrefab;
+
     public Camera CameraJoueur;     // Player's normal view
     public Camera topDownCamera;    // Overhead view
 
@@ -21,6 +23,7 @@ public class GameManager : MonoBehaviour
     {
         SpawnChestsAtRandomPositions();
         SpawnTeleportersAtRandomPositions();
+        SpawnTeleReceiversAtRandomPositions();
 
         SetTopDown(false); // Start in normal view
     }
@@ -154,6 +157,39 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    
+
+    void SpawnTeleReceiversAtRandomPositions()
+    {
+        var positions = VariablesGlobales.walkablePositions;
+        var teleRecepteurArray = VariablesGlobales.teleRecepteurs;
+        int niveau = VariablesGlobales.niveau;
+        int receiversToSpawn = (teleRecepteurArray.Length > niveau - 1) ? teleRecepteurArray[niveau - 1] : 0;
+
+        if (positions == null || positions.Count == 0)
+        {
+            Debug.LogWarning("No walkable positions available!");
+            return;
+        }
+
+        if (receiversToSpawn > positions.Count)
+        {
+            Debug.LogWarning("Not enough walkable positions for all teleporter receivers!");
+            receiversToSpawn = positions.Count;
+        }
+
+        var availablePositions = new List<Vector3>(positions);
+
+        for (int i = 0; i < receiversToSpawn; i++)
+        {
+            int randomIndex = Random.Range(0, availablePositions.Count);
+            Vector3 spawnPosition = availablePositions[randomIndex];
+            Instantiate(teleReceiverPrefab, spawnPosition, Quaternion.identity);
+            Debug.Log($"TeleReceiver {i + 1} spawned at position: {spawnPosition}");
+            availablePositions.RemoveAt(randomIndex);
+        }
+    }
+
 
 
     void Awake()
@@ -169,12 +205,12 @@ public class GameManager : MonoBehaviour
     }
 
     public void PlayerLoses()
-{
-    Debug.Log("You lose!");
-    // Do NOT reset VariablesGlobales.niveau here
-    VariablesGlobales.time = 60; // Reset time
-    VariablesGlobales.wallOpeners = VariablesGlobales.ouvreurMur[VariablesGlobales.niveau - 1]; // Reset wall openers
-    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reload the current scene
-}
+    {
+        Debug.Log("You lose!");
+        // Do NOT reset VariablesGlobales.niveau here
+        VariablesGlobales.time = 60; // Reset time
+        VariablesGlobales.wallOpeners = VariablesGlobales.ouvreurMur[VariablesGlobales.niveau - 1]; // Reset wall openers
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reload the current scene
+    }
 
 }
