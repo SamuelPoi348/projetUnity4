@@ -12,25 +12,27 @@ public class WallOpen : MonoBehaviour
     private HashSet<Transform> mursEnCours = new HashSet<Transform>();
 
     void Update()
+{
+    if (Input.GetKeyDown(KeyCode.Space) && VariablesGlobales.wallOpeners > 0 && VariablesGlobales.score > 50)
     {
-        if (Input.GetKeyDown(KeyCode.Space) && VariablesGlobales.wallOpeners > 0)
+        // Cast a ray forward from the player
+        Ray rayon = new Ray(transform.position, transform.forward);
+        RaycastHit touche;
+
+        if (Physics.Raycast(rayon, out touche, distanceInteraction, coucheOuvrable))
         {
-            Ray rayon = new Ray(transform.position, transform.forward);
-            RaycastHit touche;
+            Transform cible = touche.transform;
 
-            if (Physics.Raycast(rayon, out touche, distanceInteraction, coucheOuvrable))
+            // Prevent triggering the same wall again
+            if (!mursEnCours.Contains(cible))
             {
-                Transform cible = touche.transform;
-
-                // Prevent triggering the same wall again
-                if (!mursEnCours.Contains(cible))
-                {
-                    mursEnCours.Add(cible); // Mark this wall as "in progress"
-                    StartCoroutine(FaireGlisserCube(cible));
-                }
+                mursEnCours.Add(cible); // Mark this wall as "in progress"
+                StartCoroutine(FaireGlisserCube(cible));
             }
         }
     }
+}
+
 
     private System.Collections.IEnumerator FaireGlisserCube(Transform cube)
     {

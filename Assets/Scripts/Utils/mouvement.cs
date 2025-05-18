@@ -16,6 +16,10 @@ public class Mouvement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (VariablesGlobales.isTopDown)
+{
+    return;  // This would stop movement if you're in top-down view
+}
         float moveInput = Input.GetAxisRaw("Vertical"); // Get vertical input (W/S or Up/Down arrows)
         float turnInput = Input.GetAxisRaw("Horizontal"); // Get horizontal input (A/D or Left/Right arrows)
 
