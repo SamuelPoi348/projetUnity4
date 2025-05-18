@@ -32,11 +32,11 @@ public class MapAnalyzer : MonoBehaviour
                 {
                     VariablesGlobales.walkablePositions.Add(tileCenter);
 
-                    Debug.Log($"✅ Walkable: Tile ({x}, {z}) is free at {tileCenter}");
+                    //Debug.Log($"✅ Walkable: Tile ({x}, {z}) is free at {tileCenter}");
                 }
                 else
                 {
-                    Debug.Log($"❌ Blocked: Tile ({x}, {z}) has a wall at {tileCenter}");
+                   // Debug.Log($"❌ Blocked: Tile ({x}, {z}) has a wall at {tileCenter}");
                 }
             }
         }
