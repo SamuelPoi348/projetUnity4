@@ -22,6 +22,10 @@ public class GameManager : MonoBehaviour
     //Sons 
     public AudioSource audioSource; // Assign in Inspector
     public AudioClip SonGameOver;   // Assign in Inspector
+    public AudioClip SonWin;   // Assign in Inspector
+    public AudioClip SonNiveauSuivant;   // Assign in Inspector
+   
+
 
     public int penaltyRate = 10;
 
@@ -258,25 +262,36 @@ public class GameManager : MonoBehaviour
     public void PlayerWins()
     {
         Debug.Log("You win!");
+        
         if (VariablesGlobales.level == 10)
         {
             if (winScreen != null)
             {
+                 audioSource.PlayOneShot(SonWin); // plays without interrupting existing sounds
                 winScreen.SetActive(true);
                 Time.timeScale = 0f; // Optional: pause game
             }
         }
         else
         {
+           
             VariablesGlobales.level += 1;
             VariablesGlobales.score += (int)(10 * ((int)VariablesGlobales.time));
             VariablesGlobales.time = 60; // Reset time
-            VariablesGlobales.niveau += 1; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
+            VariablesGlobales.niveau += 1; 
+             SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
+
 
         }
 
     }
 
+private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+{
+    SceneManager.sceneLoaded -= OnSceneLoaded; // Désinscrit l'événement
+    audioSource.PlayOneShot(SonNiveauSuivant); // Joue le son une fois la scène chargée
+}
     public void PlayerLoses()
     {
         Debug.Log("You lose!");
