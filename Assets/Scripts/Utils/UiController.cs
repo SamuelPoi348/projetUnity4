@@ -26,6 +26,8 @@ public class UIController : MonoBehaviour
             Input.GetKeyDown(KeyCode.RightArrow)
         ))
         {
+                  GameManager gm = FindObjectOfType<GameManager>();
+                  gm.audioSource.PlayOneShot(gm.debutNiveau);
             ResetTimer(60f); // Reset timer to 60 seconds when any of the keys are detected
         }
 

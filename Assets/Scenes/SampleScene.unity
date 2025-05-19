@@ -35269,8 +35269,11 @@ MonoBehaviour:
   audioSource: {fileID: 1355280463}
   SonGameOver: {fileID: 8300000, guid: b556e700df985ee4b82c9c1b8811483e, type: 3}
   SonWin: {fileID: 8300000, guid: 42a0c2c1b891e3247820cc18a90e82ae, type: 3}
-  SonNiveauSuivant: {fileID: 8300000, guid: 52a406640f496da4eaad99b0f87750c7, type: 3}
+  SonNiveauSuivant: {fileID: 8300000, guid: 877c1fdc27d931a4e9c1d2f6186926f3, type: 3}
+  SonMort: {fileID: 8300000, guid: 4b3a16bf76a191741b1453cdb2795fe4, type: 3}
+  debutNiveau: {fileID: 8300000, guid: 877c1fdc27d931a4e9c1d2f6186926f3, type: 3}
   SonTeleport: {fileID: 8300000, guid: 79cf163c8f6c01a40911aa2d49a70f70, type: 3}
+  SonMonteMur: {fileID: 8300000, guid: 3d44c16950fbc2e49aa79b220208a6cc, type: 3}
   penaltyRate: 10
 --- !u!82 &1355280463
 AudioSource:

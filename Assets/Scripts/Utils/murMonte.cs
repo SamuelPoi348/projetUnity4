@@ -10,6 +10,9 @@ public class TriggerWall : MonoBehaviour
     {
         if (player.position.z >= 2.5f && bin == false)
         {
+          GameManager gm = FindObjectOfType<GameManager>();
+gm.audioSource.PlayOneShot(gm.SonMonteMur);
+
             wall.transform.position = new Vector3(
                 wall.transform.position.x, 
                 0.5f, 

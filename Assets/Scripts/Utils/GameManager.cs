@@ -24,7 +24,10 @@ public class GameManager : MonoBehaviour
     public AudioClip SonGameOver;   // Assign in Inspector
     public AudioClip SonWin;   // Assign in Inspector
     public AudioClip SonNiveauSuivant;   // Assign in Inspector
+    public AudioClip SonMort;
+    public AudioClip debutNiveau;
     public AudioClip SonTeleport; // Assign in Inspector
+    public AudioClip SonMonteMur;
 
     private bool cheatModeActive = false;
     private int topDownHiddenLayer;
@@ -266,7 +269,7 @@ public class GameManager : MonoBehaviour
     void UpdateTopDownHiddenObjects()
     {
         // Find all objects in the TopDownHidden layer
-        GameObject[] allObjects = FindObjectsOfType<GameObject>();
+GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
         bool shouldShow = !VariablesGlobales.isTopDown || cheatModeActive;
 
         foreach (var obj in allObjects)
@@ -306,7 +309,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-
+             audioSource.PlayOneShot(SonNiveauSuivant); // plays without interrupting existing sounds
             VariablesGlobales.level += 1;
             VariablesGlobales.score += (int)(10 * ((int)VariablesGlobales.time));
             VariablesGlobales.time = 60; // Reset time
@@ -345,6 +348,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            VariablesGlobales.score -= 200; // Deduct points
+            audioSource.PlayOneShot(sonMort); // plays without interrupting existing sounds
             // Do NOT reset VariablesGlobales.niveau here
             VariablesGlobales.time = 60; // Reset time
             VariablesGlobales.wallOpeners = VariablesGlobales.ouvreurMur[VariablesGlobales.niveau - 1]; // Reset wall openers

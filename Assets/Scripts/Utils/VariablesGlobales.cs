@@ -27,4 +27,5 @@ public static class VariablesGlobales
 
     //position coffre
     public static Vector3 positionCoffre = new Vector3(0, 0, 0);
+    
 }
