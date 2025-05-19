@@ -8,36 +8,44 @@ public class WallOpen : MonoBehaviour
     public float niveauSol = -0.1999f;
     public LayerMask coucheOuvrable;
 
+    public AudioClip SonWallLower;
+
     // Holds the set of walls currently being lowered
     private HashSet<Transform> mursEnCours = new HashSet<Transform>();
 
     void Update()
-{
-    if (Input.GetKeyDown(KeyCode.Space) && VariablesGlobales.wallOpeners > 0 && VariablesGlobales.score > 50)
     {
-        // Cast a ray forward from the player
-        Ray rayon = new Ray(transform.position, transform.forward);
-        RaycastHit touche;
-
-        if (Physics.Raycast(rayon, out touche, distanceInteraction, coucheOuvrable))
+        if (Input.GetKeyDown(KeyCode.Space) && VariablesGlobales.wallOpeners > 0 && VariablesGlobales.score > 50)
         {
-            Transform cible = touche.transform;
+            // Cast a ray forward from the player
+            Ray rayon = new Ray(transform.position, transform.forward);
+            RaycastHit touche;
 
-            // Prevent triggering the same wall again
-            if (!mursEnCours.Contains(cible))
+            if (Physics.Raycast(rayon, out touche, distanceInteraction, coucheOuvrable))
             {
-                mursEnCours.Add(cible); // Mark this wall as "in progress"
-                StartCoroutine(FaireGlisserCube(cible));
+                Transform cible = touche.transform;
+
+                // Prevent triggering the same wall again
+                if (!mursEnCours.Contains(cible))
+                {
+                    mursEnCours.Add(cible); // Mark this wall as "in progress"
+                    StartCoroutine(FaireGlisserCube(cible));
+                }
             }
         }
     }
-}
 
 
     private System.Collections.IEnumerator FaireGlisserCube(Transform cube)
     {
         VariablesGlobales.wallOpeners--;
         VariablesGlobales.score -= 50;
+
+        // Play sound
+        if (SonWallLower != null && GameManager.Instance != null && GameManager.Instance.audioSource != null)
+        {
+            GameManager.Instance.audioSource.PlayOneShot(SonWallLower);
+        }
 
         Vector3 positionInitiale = cube.position;
         Vector3 positionFinale = new Vector3(positionInitiale.x, niveauSol, positionInitiale.z);

@@ -24,8 +24,10 @@ public class GameManager : MonoBehaviour
     public AudioClip SonGameOver;   // Assign in Inspector
     public AudioClip SonWin;   // Assign in Inspector
     public AudioClip SonNiveauSuivant;   // Assign in Inspector
-   
+    public AudioClip SonTeleport; // Assign in Inspector
 
+    private bool cheatModeActive = false;
+    private int topDownHiddenLayer;
 
     public int penaltyRate = 10;
 
@@ -44,16 +46,21 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         // Camera switch
-       // Camera switch
         if ((Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.PageUp)) && VariablesGlobales.score >= 10)
-         {
-             SetTopDown(true);
-          }
-         else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.PageDown))
-         {
-              SetTopDown(false);
-          }
+        {
+            SetTopDown(true);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.PageDown))
+        {
+            SetTopDown(false);
+        }
 
+        // Cheat mode toggle (only in top-down view)
+        if (VariablesGlobales.isTopDown && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Space))
+        {
+            cheatModeActive = !cheatModeActive;
+            UpdateTopDownHiddenObjects();
+        }
 
         // Point penalty while in top-down view
         if (VariablesGlobales.isTopDown)
@@ -104,6 +111,12 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+
+        // Reset cheat mode when leaving top-down view
+        if (!topDown)
+            cheatModeActive = false;
+
+        UpdateTopDownHiddenObjects();
     }
 
 
@@ -209,47 +222,65 @@ public class GameManager : MonoBehaviour
 
 
     void SpawnArrowsPointingToChest()
-{
-    var positions = VariablesGlobales.walkablePositions;
-    var flechesArray = VariablesGlobales.fleches;
-    int niveau = VariablesGlobales.niveau;
-    int arrowsToSpawn = (flechesArray.Length > niveau - 1) ? flechesArray[niveau - 1] : 0;
-
-    if (positions == null || positions.Count == 0)
     {
-        Debug.LogWarning("No walkable positions available!");
-        return;
+        var positions = VariablesGlobales.walkablePositions;
+        var flechesArray = VariablesGlobales.fleches;
+        int niveau = VariablesGlobales.niveau;
+        int arrowsToSpawn = (flechesArray.Length > niveau - 1) ? flechesArray[niveau - 1] : 0;
+
+        if (positions == null || positions.Count == 0)
+        {
+            Debug.LogWarning("No walkable positions available!");
+            return;
+        }
+
+        if (arrowsToSpawn > positions.Count)
+        {
+            Debug.LogWarning("Not enough walkable positions for all arrows!");
+            arrowsToSpawn = positions.Count;
+        }
+
+        var availablePositions = new List<Vector3>(positions);
+
+        for (int i = 0; i < arrowsToSpawn; i++)
+        {
+            int randomIndex = Random.Range(0, availablePositions.Count);
+            Vector3 spawnPosition = availablePositions[randomIndex] + Vector3.up * 1f; // Raise above ground
+
+            Vector3 chestPosition = VariablesGlobales.positionCoffre;
+
+            // Compute direction on horizontal (XZ) plane
+            Vector3 flatDirection = chestPosition - spawnPosition;
+            flatDirection.y = 0;
+            flatDirection.Normalize();
+
+            // Rotate arrow that normally points up (Y+) to look toward chest
+            Quaternion rotation = Quaternion.FromToRotation(Vector3.up, flatDirection);
+
+            GameObject arrow = Instantiate(arrowPrefab, spawnPosition, rotation);
+
+            availablePositions.RemoveAt(randomIndex);
+        }
     }
 
-    if (arrowsToSpawn > positions.Count)
+    void UpdateTopDownHiddenObjects()
     {
-        Debug.LogWarning("Not enough walkable positions for all arrows!");
-        arrowsToSpawn = positions.Count;
+        // Find all objects in the TopDownHidden layer
+        GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        bool shouldShow = !VariablesGlobales.isTopDown || cheatModeActive;
+
+        foreach (var obj in allObjects)
+        {
+            if (obj.layer == topDownHiddenLayer)
+            {
+                var renderers = obj.GetComponentsInChildren<Renderer>(true);
+                foreach (var renderer in renderers)
+                {
+                    renderer.enabled = shouldShow;
+                }
+            }
+        }
     }
-
-    var availablePositions = new List<Vector3>(positions);
-
-    for (int i = 0; i < arrowsToSpawn; i++)
-    {
-        int randomIndex = Random.Range(0, availablePositions.Count);
-        Vector3 spawnPosition = availablePositions[randomIndex] + Vector3.up * 1f; // Raise above ground
-
-        Vector3 chestPosition = VariablesGlobales.positionCoffre;
-
-        // Compute direction on horizontal (XZ) plane
-        Vector3 flatDirection = chestPosition - spawnPosition;
-        flatDirection.y = 0;
-        flatDirection.Normalize();
-
-        // Rotate arrow that normally points up (Y+) to look toward chest
-        Quaternion rotation = Quaternion.FromToRotation(Vector3.up, flatDirection);
-
-        GameObject arrow = Instantiate(arrowPrefab, spawnPosition, rotation);
-
-        availablePositions.RemoveAt(randomIndex);
-    }
-}
-
 
 
 
@@ -257,29 +288,30 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        topDownHiddenLayer = LayerMask.NameToLayer("TopDownHidden");
     }
 
     public void PlayerWins()
     {
         Debug.Log("You win!");
-        
+
         if (VariablesGlobales.level == 10)
         {
             if (winScreen != null)
             {
-                 audioSource.PlayOneShot(SonWin); // plays without interrupting existing sounds
+                audioSource.PlayOneShot(SonWin); // plays without interrupting existing sounds
                 winScreen.SetActive(true);
                 Time.timeScale = 0f; // Optional: pause game
             }
         }
         else
         {
-           
+
             VariablesGlobales.level += 1;
             VariablesGlobales.score += (int)(10 * ((int)VariablesGlobales.time));
             VariablesGlobales.time = 60; // Reset time
-            VariablesGlobales.niveau += 1; 
-             SceneManager.sceneLoaded += OnSceneLoaded;
+            VariablesGlobales.niveau += 1;
+            SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
 
 
@@ -287,11 +319,12 @@ public class GameManager : MonoBehaviour
 
     }
 
-private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-{
-    SceneManager.sceneLoaded -= OnSceneLoaded; // Désinscrit l'événement
-    audioSource.PlayOneShot(SonNiveauSuivant); // Joue le son une fois la scène chargée
-}
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded; // Unsubscribe event
+        Time.timeScale = 1f; // Ensure time is running so audio plays
+        audioSource.PlayOneShot(SonNiveauSuivant); // Play the level up sound
+    }
     public void PlayerLoses()
     {
         Debug.Log("You lose!");
@@ -302,7 +335,7 @@ private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
             {
                 deathScreen.SetActive(true);
                 Time.timeScale = 0f; // Optional: pause game
-                 audioSource.PlayOneShot(SonGameOver); // plays without interrupting existing sounds
+                audioSource.PlayOneShot(SonGameOver); // plays without interrupting existing sounds
             }
             else
             {
