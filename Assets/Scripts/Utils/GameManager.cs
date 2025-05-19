@@ -7,9 +7,10 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public GameObject chestPrefab;
     public GameObject teleporterPrefab;
+    public GameObject arrowPrefab; // Assign your arrow prefab in the Inspector
 
-     public GameObject deathScreen; // Drag this from the Inspector
-       public GameObject winScreen; // Drag this from the Inspector
+    public GameObject deathScreen; // Drag this from the Inspector
+    public GameObject winScreen; // Drag this from the Inspector
 
     public GameObject teleReceiverPrefab;
 
@@ -17,6 +18,10 @@ public class GameManager : MonoBehaviour
     public Camera topDownCamera;    // Overhead view
 
     public GameObject player; // Assign this in the Inspector
+
+    //Sons 
+    public AudioSource audioSource; // Assign in Inspector
+    public AudioClip SonGameOver;   // Assign in Inspector
 
     public int penaltyRate = 10;
 
@@ -127,6 +132,9 @@ public class GameManager : MonoBehaviour
             VariablesGlobales.positionCoffre = spawnPosition;
             Debug.Log($"Position coffre: {VariablesGlobales.positionCoffre}");
         }
+
+        // Call this after the chest is spawned and positionCoffre is set
+        SpawnArrowsPointingToChest();
     }
 
     void SpawnTeleportersAtRandomPositions()
@@ -160,7 +168,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    
+
 
     void SpawnTeleReceiversAtRandomPositions()
     {
@@ -194,6 +202,47 @@ public class GameManager : MonoBehaviour
     }
 
 
+    void SpawnArrowsPointingToChest()
+    {
+        var positions = VariablesGlobales.walkablePositions;
+        var flechesArray = VariablesGlobales.fleches;
+        int niveau = VariablesGlobales.niveau;
+        int arrowsToSpawn = (flechesArray.Length > niveau - 1) ? flechesArray[niveau - 1] : 0;
+
+        if (positions == null || positions.Count == 0)
+        {
+            Debug.LogWarning("No walkable positions available!");
+            return;
+        }
+
+        if (arrowsToSpawn > positions.Count)
+        {
+            Debug.LogWarning("Not enough walkable positions for all arrows!");
+            arrowsToSpawn = positions.Count;
+        }
+
+        var availablePositions = new List<Vector3>(positions);
+
+        for (int i = 0; i < arrowsToSpawn; i++)
+        {
+            int randomIndex = Random.Range(0, availablePositions.Count);
+            Vector3 spawnPosition = availablePositions[randomIndex] + Vector3.up * 1f; // Raise above ground
+
+            Vector3 chestPosition = VariablesGlobales.positionCoffre;
+            Vector3 direction = (chestPosition - spawnPosition).normalized;
+
+            // If arrow tip is along Y axis:
+            Quaternion rotation = Quaternion.FromToRotation(Vector3.up, direction);
+            GameObject arrow = Instantiate(arrowPrefab, spawnPosition, rotation);
+
+            // If arrow tip is along Z axis, use this instead:
+            // GameObject arrow = Instantiate(arrowPrefab, spawnPosition, Quaternion.LookRotation(direction, Vector3.up));
+
+            availablePositions.RemoveAt(randomIndex);
+        }
+    }
+
+
 
     void Awake()
     {
@@ -203,45 +252,51 @@ public class GameManager : MonoBehaviour
     public void PlayerWins()
     {
         Debug.Log("You win!");
-        if(VariablesGlobales.level==10) {
-             if (winScreen != null) {
-            winScreen.SetActive(true);
-            Time.timeScale = 0f; // Optional: pause game
-             }
-        } else {
- VariablesGlobales.level += 1;
-      VariablesGlobales.score += (int)(10 * VariablesGlobales.time);
-        VariablesGlobales.time = 60; // Reset time
-        VariablesGlobales.niveau += 1; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
+        if (VariablesGlobales.level == 10)
+        {
+            if (winScreen != null)
+            {
+                winScreen.SetActive(true);
+                Time.timeScale = 0f; // Optional: pause game
+            }
+        }
+        else
+        {
+            VariablesGlobales.level += 1;
+            VariablesGlobales.score += (int)(10 * VariablesGlobales.time);
+            VariablesGlobales.time = 60; // Reset time
+            VariablesGlobales.niveau += 1; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
 
         }
-        
+
     }
 
     public void PlayerLoses()
     {
         Debug.Log("You lose!");
-        if (VariablesGlobales.score <200)
+        if (VariablesGlobales.score < 200)
         {
-              // Show death screen UI
-        if (deathScreen != null)
-        {
-            deathScreen.SetActive(true);
-            Time.timeScale = 0f; // Optional: pause game
-        }
-        else
-        {
-            Debug.LogWarning("Death screen not assigned in the inspector.");
-        }
+            // Show death screen UI
+            if (deathScreen != null)
+            {
+                deathScreen.SetActive(true);
+                Time.timeScale = 0f; // Optional: pause game
+                 audioSource.PlayOneShot(SonGameOver); // plays without interrupting existing sounds
+            }
+            else
+            {
+                Debug.LogWarning("Death screen not assigned in the inspector.");
+
+            }
         }
         else
         {
             // Do NOT reset VariablesGlobales.niveau here
-        VariablesGlobales.time = 60; // Reset time
-        VariablesGlobales.wallOpeners = VariablesGlobales.ouvreurMur[VariablesGlobales.niveau - 1]; // Reset wall openers
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reload the current scene
+            VariablesGlobales.time = 60; // Reset time
+            VariablesGlobales.wallOpeners = VariablesGlobales.ouvreurMur[VariablesGlobales.niveau - 1]; // Reset wall openers
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reload the current scene
         }
-       
+
     }
 
 }
