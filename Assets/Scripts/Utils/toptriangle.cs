@@ -23,7 +23,7 @@ public class TriangleOnCapsule : MonoBehaviour
         meshFilter.mesh = CreateTriangleMesh();
 
         // Position above the capsule
-        triangle.transform.localPosition = new Vector3(0f, capsule.transform.localScale.y / 2 + heightOffset, 0f);
+       triangle.transform.localPosition = new Vector3(0f, capsule.transform.localScale.y / 2 + 0.3f, 0f); // Lower the triangle
 
         // Rotate flat on XZ plane and add 180° twist to reverse its direction
         triangle.transform.localEulerAngles = new Vector3(-90f, 180f, 0f);
