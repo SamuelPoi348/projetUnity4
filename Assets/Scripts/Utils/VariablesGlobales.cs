@@ -5,7 +5,7 @@ public static class VariablesGlobales
 {
 
     // niveau courant
-    public static int niveau = 5;
+    public static int niveau = 10;
 
     // Arrays for items
     public static int[] Tresor = new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
@@ -18,7 +18,7 @@ public static class VariablesGlobales
     public static List<Vector3> walkablePositions = new List<Vector3>();
 
     // Score and map variables
-    public static int level = 1;
+    public static int level = niveau;
     public static int wallOpeners = 4;
     public static float time = 60f;
     public static int score = 300;
