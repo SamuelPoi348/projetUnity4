@@ -40,14 +40,16 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         // Camera switch
-        if (Input.GetKeyDown(KeyCode.Alpha1) && VariablesGlobales.score >= 10)
-        {
-            SetTopDown(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            SetTopDown(false);
-        }
+       // Camera switch
+        if ((Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.PageUp)) && VariablesGlobales.score >= 10)
+         {
+             SetTopDown(true);
+          }
+         else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.PageDown))
+         {
+              SetTopDown(false);
+          }
+
 
         // Point penalty while in top-down view
         if (VariablesGlobales.isTopDown)
@@ -203,44 +205,48 @@ public class GameManager : MonoBehaviour
 
 
     void SpawnArrowsPointingToChest()
+{
+    var positions = VariablesGlobales.walkablePositions;
+    var flechesArray = VariablesGlobales.fleches;
+    int niveau = VariablesGlobales.niveau;
+    int arrowsToSpawn = (flechesArray.Length > niveau - 1) ? flechesArray[niveau - 1] : 0;
+
+    if (positions == null || positions.Count == 0)
     {
-        var positions = VariablesGlobales.walkablePositions;
-        var flechesArray = VariablesGlobales.fleches;
-        int niveau = VariablesGlobales.niveau;
-        int arrowsToSpawn = (flechesArray.Length > niveau - 1) ? flechesArray[niveau - 1] : 0;
-
-        if (positions == null || positions.Count == 0)
-        {
-            Debug.LogWarning("No walkable positions available!");
-            return;
-        }
-
-        if (arrowsToSpawn > positions.Count)
-        {
-            Debug.LogWarning("Not enough walkable positions for all arrows!");
-            arrowsToSpawn = positions.Count;
-        }
-
-        var availablePositions = new List<Vector3>(positions);
-
-        for (int i = 0; i < arrowsToSpawn; i++)
-        {
-            int randomIndex = Random.Range(0, availablePositions.Count);
-            Vector3 spawnPosition = availablePositions[randomIndex] + Vector3.up * 1f; // Raise above ground
-
-            Vector3 chestPosition = VariablesGlobales.positionCoffre;
-            Vector3 direction = (chestPosition - spawnPosition).normalized;
-
-            // If arrow tip is along Y axis:
-            Quaternion rotation = Quaternion.FromToRotation(Vector3.up, direction);
-            GameObject arrow = Instantiate(arrowPrefab, spawnPosition, rotation);
-
-            // If arrow tip is along Z axis, use this instead:
-            // GameObject arrow = Instantiate(arrowPrefab, spawnPosition, Quaternion.LookRotation(direction, Vector3.up));
-
-            availablePositions.RemoveAt(randomIndex);
-        }
+        Debug.LogWarning("No walkable positions available!");
+        return;
     }
+
+    if (arrowsToSpawn > positions.Count)
+    {
+        Debug.LogWarning("Not enough walkable positions for all arrows!");
+        arrowsToSpawn = positions.Count;
+    }
+
+    var availablePositions = new List<Vector3>(positions);
+
+    for (int i = 0; i < arrowsToSpawn; i++)
+    {
+        int randomIndex = Random.Range(0, availablePositions.Count);
+        Vector3 spawnPosition = availablePositions[randomIndex] + Vector3.up * 1f; // Raise above ground
+
+        Vector3 chestPosition = VariablesGlobales.positionCoffre;
+
+        // Compute direction on horizontal (XZ) plane
+        Vector3 flatDirection = chestPosition - spawnPosition;
+        flatDirection.y = 0;
+        flatDirection.Normalize();
+
+        // Rotate arrow that normally points up (Y+) to look toward chest
+        Quaternion rotation = Quaternion.FromToRotation(Vector3.up, flatDirection);
+
+        GameObject arrow = Instantiate(arrowPrefab, spawnPosition, rotation);
+
+        availablePositions.RemoveAt(randomIndex);
+    }
+}
+
+
 
 
 
@@ -263,7 +269,7 @@ public class GameManager : MonoBehaviour
         else
         {
             VariablesGlobales.level += 1;
-            VariablesGlobales.score += (int)(10 * VariablesGlobales.time);
+            VariablesGlobales.score += (int)(10 * ((int)VariablesGlobales.time));
             VariablesGlobales.time = 60; // Reset time
             VariablesGlobales.niveau += 1; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
 

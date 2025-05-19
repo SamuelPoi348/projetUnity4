@@ -1,43 +1,61 @@
-using TMPro;
 using UnityEngine;
+using TMPro;
 
 public class UIController : MonoBehaviour
 {
     public TMP_Text statusText;
 
-   // public int score = 0;
-   // public int level = 1;
-   // public int wallOpeners = 3;
-
-   // private float remainingTime = 60f; // Démarre à 60 secondes
-    private bool timerRunning = true;
+    private bool timerRunning = false;
 
     void Update()
     {
-        if (timerRunning && VariablesGlobales.time  > 0)
+        // Start timer when an input is made (e.g., pressing a key)
+       if (!timerRunning && (
+            Input.GetKeyDown(KeyCode.Space) ||
+            Input.GetKeyDown(KeyCode.PageUp) ||
+            Input.GetKeyDown(KeyCode.PageDown) ||
+            Input.GetKeyDown(KeyCode.Alpha1) ||
+            Input.GetKeyDown(KeyCode.Alpha2) ||
+            Input.GetKeyDown(KeyCode.W) ||
+            Input.GetKeyDown(KeyCode.A) ||
+            Input.GetKeyDown(KeyCode.S) ||
+            Input.GetKeyDown(KeyCode.D) ||
+            Input.GetKeyDown(KeyCode.UpArrow) ||
+            Input.GetKeyDown(KeyCode.DownArrow) ||
+            Input.GetKeyDown(KeyCode.LeftArrow) ||
+            Input.GetKeyDown(KeyCode.RightArrow)
+        ))
         {
-            VariablesGlobales.time  -= Time.deltaTime;
-
-            // Clamp à 0 pour éviter les valeurs négatives
-            if (VariablesGlobales.time  < 0)
-                VariablesGlobales.time  = 0;
+            ResetTimer(60f); // Reset timer to 60 seconds when any of the keys are detected
         }
 
-        int displayTime = Mathf.CeilToInt(VariablesGlobales.time ); // Arrondi vers le haut
+        // If the timer is running, decrement the time
+        if (timerRunning && VariablesGlobales.time > 0)
+        {
+            VariablesGlobales.time -= Time.deltaTime;
 
+            // Clamp time to 0 to avoid negative values
+            if (VariablesGlobales.time < 0)
+                VariablesGlobales.time = 0;
+        }
+
+        // Display time as an integer (rounded up)
+        int displayTime = Mathf.CeilToInt(VariablesGlobales.time);
+
+        // Update the UI text with the current status
         statusText.text = $"Score: {VariablesGlobales.score}    Time: {displayTime}s    Level: {VariablesGlobales.level}    Wall Openers: {VariablesGlobales.wallOpeners}";
     }
 
-    // Facultatif : méthode pour arrêter le timer
+    // Method to stop the timer
     public void StopTimer()
     {
         timerRunning = false;
     }
 
-    // Facultatif : méthode pour relancer ou réinitialiser
+    // Method to reset the timer (and start it again)
     public void ResetTimer(float time = 60f)
     {
-        VariablesGlobales.time  = time;
+        VariablesGlobales.time = time;
         timerRunning = true;
     }
 }
