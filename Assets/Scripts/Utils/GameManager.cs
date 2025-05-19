@@ -349,7 +349,7 @@ GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMo
         else
         {
             VariablesGlobales.score -= 200; // Deduct points
-            audioSource.PlayOneShot(sonMort); // plays without interrupting existing sounds
+            audioSource.PlayOneShot(SonMort); // plays without interrupting existing sounds
             // Do NOT reset VariablesGlobales.niveau here
             VariablesGlobales.time = 60; // Reset time
             VariablesGlobales.wallOpeners = VariablesGlobales.ouvreurMur[VariablesGlobales.niveau - 1]; // Reset wall openers
