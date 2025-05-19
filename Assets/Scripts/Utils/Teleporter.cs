@@ -34,6 +34,12 @@ public class Teleporter : MonoBehaviour
             Transform playerRoot = other.transform.root;
             playerRoot.position = randomReceiver.transform.position + Vector3.up * yOffset;
 
+            // Play teleport sound
+            if (GameManager.Instance != null && GameManager.Instance.audioSource != null && GameManager.Instance.SonTeleport != null)
+            {
+                GameManager.Instance.audioSource.PlayOneShot(GameManager.Instance.SonTeleport);
+            }
+
             if (cc != null) cc.enabled = true;
 
             if (rb != null)

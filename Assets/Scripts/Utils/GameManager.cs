@@ -22,6 +22,12 @@ public class GameManager : MonoBehaviour
     //Sons 
     public AudioSource audioSource; // Assign in Inspector
     public AudioClip SonGameOver;   // Assign in Inspector
+    public AudioClip SonWin;   // Assign in Inspector
+    public AudioClip SonNiveauSuivant;   // Assign in Inspector
+    public AudioClip SonTeleport; // Assign in Inspector
+
+    private bool cheatModeActive = false;
+    private int topDownHiddenLayer;
 
     public int penaltyRate = 10;
 
@@ -40,13 +46,20 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         // Camera switch
-        if (Input.GetKeyDown(KeyCode.Alpha1) && VariablesGlobales.score >= 10)
+        if ((Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.PageUp)) && VariablesGlobales.score >= 10)
         {
             SetTopDown(true);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.PageDown))
         {
             SetTopDown(false);
+        }
+
+        // Cheat mode toggle (only in top-down view)
+        if (VariablesGlobales.isTopDown && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Space))
+        {
+            cheatModeActive = !cheatModeActive;
+            UpdateTopDownHiddenObjects();
         }
 
         // Point penalty while in top-down view
@@ -98,6 +111,12 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+
+        // Reset cheat mode when leaving top-down view
+        if (!topDown)
+            cheatModeActive = false;
+
+        UpdateTopDownHiddenObjects();
     }
 
 
@@ -229,48 +248,83 @@ public class GameManager : MonoBehaviour
             Vector3 spawnPosition = availablePositions[randomIndex] + Vector3.up * 1f; // Raise above ground
 
             Vector3 chestPosition = VariablesGlobales.positionCoffre;
-            Vector3 direction = (chestPosition - spawnPosition).normalized;
 
-            // If arrow tip is along Y axis:
-            Quaternion rotation = Quaternion.FromToRotation(Vector3.up, direction);
+            // Compute direction on horizontal (XZ) plane
+            Vector3 flatDirection = chestPosition - spawnPosition;
+            flatDirection.y = 0;
+            flatDirection.Normalize();
+
+            // Rotate arrow that normally points up (Y+) to look toward chest
+            Quaternion rotation = Quaternion.FromToRotation(Vector3.up, flatDirection);
+
             GameObject arrow = Instantiate(arrowPrefab, spawnPosition, rotation);
-
-            // If arrow tip is along Z axis, use this instead:
-            // GameObject arrow = Instantiate(arrowPrefab, spawnPosition, Quaternion.LookRotation(direction, Vector3.up));
 
             availablePositions.RemoveAt(randomIndex);
         }
     }
+
+    void UpdateTopDownHiddenObjects()
+    {
+        // Find all objects in the TopDownHidden layer
+        GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        bool shouldShow = !VariablesGlobales.isTopDown || cheatModeActive;
+
+        foreach (var obj in allObjects)
+        {
+            if (obj.layer == topDownHiddenLayer)
+            {
+                var renderers = obj.GetComponentsInChildren<Renderer>(true);
+                foreach (var renderer in renderers)
+                {
+                    renderer.enabled = shouldShow;
+                }
+            }
+        }
+    }
+
 
 
 
     void Awake()
     {
         Instance = this;
+        topDownHiddenLayer = LayerMask.NameToLayer("TopDownHidden");
     }
 
     public void PlayerWins()
     {
         Debug.Log("You win!");
+
         if (VariablesGlobales.level == 10)
         {
             if (winScreen != null)
             {
+                audioSource.PlayOneShot(SonWin); // plays without interrupting existing sounds
                 winScreen.SetActive(true);
                 Time.timeScale = 0f; // Optional: pause game
             }
         }
         else
         {
+
             VariablesGlobales.level += 1;
-            VariablesGlobales.score += (int)(10 * VariablesGlobales.time);
+            VariablesGlobales.score += (int)(10 * ((int)VariablesGlobales.time));
             VariablesGlobales.time = 60; // Reset time
-            VariablesGlobales.niveau += 1; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
+            VariablesGlobales.niveau += 1;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the current scene
+
 
         }
 
     }
 
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded; // Unsubscribe event
+        Time.timeScale = 1f; // Ensure time is running so audio plays
+        audioSource.PlayOneShot(SonNiveauSuivant); // Play the level up sound
+    }
     public void PlayerLoses()
     {
         Debug.Log("You lose!");
@@ -281,7 +335,7 @@ public class GameManager : MonoBehaviour
             {
                 deathScreen.SetActive(true);
                 Time.timeScale = 0f; // Optional: pause game
-                 audioSource.PlayOneShot(SonGameOver); // plays without interrupting existing sounds
+                audioSource.PlayOneShot(SonGameOver); // plays without interrupting existing sounds
             }
             else
             {
